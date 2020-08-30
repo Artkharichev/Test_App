@@ -19,7 +19,7 @@ class DetailTableViewCell: UITableViewCell {
     func configure(with user: UserInfo) {
         userName.text = user.name ?? "No name"
         userLogin.text = "Login: \(user.login)"
-        userDate.text = "Created: \(user.created_at)"
+        userDate.text = "Created: \(user.created_at ?? "No info")"
         userLocation.text = "City: \(user.location ?? "No info")"
         userImage.fetchImage(with: user.avatar_url)
     }

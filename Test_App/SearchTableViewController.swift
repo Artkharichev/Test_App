@@ -12,9 +12,10 @@ class SearchTableViewController: UITableViewController {
 
     @IBOutlet var userSearchBar: UISearchBar!
     
-    var users: [UserInfo] = []
-    var usersToShow: [User] = []
-    var searchUsers: SearchResult?
+    var users: [User] = []
+    private var searchUsers: SearchResult?
+    private var page = 1
+    private var query = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,31 +23,19 @@ class SearchTableViewController: UITableViewController {
         userSearchBar.searchBarStyle = .minimal
         userSearchBar.placeholder = "GitHub user search"
         
-        NetworkManager.fetchUserData { result in
-
-            switch result {
-            case .success(let user):
-                self.users.append(user)
-                self.tableView.reloadData()
-            case .failure(let error):
-                print(error)
-            }
-        }
-        
     }
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return usersToShow.count
+        return users.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! SearchTableViewCell
 
-        let user = usersToShow[indexPath.row]
+        let user = users[indexPath.row]
         cell.configure(with: user)
         
         return cell
@@ -63,7 +52,7 @@ class SearchTableViewController: UITableViewController {
             
             guard let indexPath = tableView.indexPathForSelectedRow else {return}
             
-            let user = usersToShow[indexPath.row]
+            let user = users[indexPath.row]
             
             let detailVC = segue.destination as! DetailTableViewController
             
@@ -73,29 +62,80 @@ class SearchTableViewController: UITableViewController {
     }
 }
 
+// MARK: - Search
+
 extension SearchTableViewController : UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
         if let query = userSearchBar.text {
-            NetworkManager.fetchUsers(with: query, page: 1) { result in
+            
+            self.query = query
+            page = 1
+            
+            NetworkManager.fetchUsers(with: query, page: self.page) { result in
                 
                 switch result {
                 case .success(let searchResults):
                     
+                    self.users.removeAll()
+                    
+                    
                     for user in searchResults.items {
-                        self.usersToShow.append(user)
+                        self.users.append(user)
                     }
-
+                    self.page += 1
                     self.tableView.reloadData()
                 case .failure(let error):
                     print(error)
                 }
-                
             }
-
         }
-
+        
+        searchBar.resignFirstResponder()
     }
     
+    override func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        userSearchBar.resignFirstResponder()
+    }
+}
+
+// MARK: - Upload result
+
+extension SearchTableViewController {
     
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let index = indexPath.row
+        if index == users.count - 3 {
+            
+            NetworkManager.fetchUsers(with: query, page: page) { result in
+                
+                switch result {
+                case .success(let searchResults):
+                    
+                    if self.checkResultCount(result: searchResults, page: self.page) {
+                    
+                        for user in searchResults.items {
+                            self.users.append(user)
+                        }
+                        self.page += 1
+                        self.tableView.reloadData()
+                    }
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
+    }
+    
+    private func checkResultCount(result: SearchResult, page: Int) -> Bool {
+        
+        let count = result.total_count
+        
+        if (count / 20) >= (page - 1){
+            return true
+        } else {
+            return false
+        }
+    }
 }
