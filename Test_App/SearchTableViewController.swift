@@ -13,6 +13,8 @@ class SearchTableViewController: UITableViewController {
     @IBOutlet var userSearchBar: UISearchBar!
     
     var users: [UserInfo] = []
+    var usersToShow: [User] = []
+    var searchUsers: SearchResult?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +31,6 @@ class SearchTableViewController: UITableViewController {
             case .failure(let error):
                 print(error)
             }
-
         }
         
     }
@@ -38,14 +39,14 @@ class SearchTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return users.count
+        return usersToShow.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! SearchTableViewCell
 
-        let user = users[indexPath.row]
+        let user = usersToShow[indexPath.row]
         cell.configure(with: user)
         
         return cell
@@ -62,11 +63,11 @@ class SearchTableViewController: UITableViewController {
             
             guard let indexPath = tableView.indexPathForSelectedRow else {return}
             
-            let user = users[indexPath.row]
+            let user = usersToShow[indexPath.row]
             
             let detailVC = segue.destination as! DetailTableViewController
             
-            detailVC.currentUser = user
+            detailVC.currentUserName = user.login
     
         }
     }
@@ -76,7 +77,22 @@ extension SearchTableViewController : UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let query = userSearchBar.text {
-                    print(query)
+            NetworkManager.fetchUsers(with: query, page: 1) { result in
+                
+                switch result {
+                case .success(let searchResults):
+                    
+                    for user in searchResults.items {
+                        self.usersToShow.append(user)
+                    }
+
+                    self.tableView.reloadData()
+                case .failure(let error):
+                    print(error)
+                }
+                
+            }
+
         }
 
     }

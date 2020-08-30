@@ -33,9 +33,9 @@ class RepoTableViewCell: UITableViewCell {
     }
     
     func configure(with repo: Repo) {
-        repoName.text = repo.name
+        repoName.text = repo.name ?? "No repos"
         language.text = repo.language ?? "No info"
-        dateUpdate.text = repo.updated_at
+        dateUpdate.text = repo.updated_at ?? "No date"
         stars.text = "\(repo.stargazers_count)"
     }
     

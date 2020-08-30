@@ -8,19 +8,18 @@
 
 import Foundation
 
-//struct SearchResult: Decodable {
-//    var items: [UserInfo]
-//}
+struct SearchResult: Decodable {
+    var items: [User]
+}
 
 struct UserInfo: Decodable {
     
     let login: String
     let avatar_url: String
-    let type: String
     
-    let name: String
+    let name: String?
     let created_at: String
-    let location: String
+    let location: String?
     
     let public_repos: Int
     
@@ -29,9 +28,30 @@ struct UserInfo: Decodable {
 
 struct Repo: Decodable {
 
-    let name: String
+    let name: String?
     let language: String?
 
-    let updated_at: String
+    let updated_at: String?
     let stargazers_count: Int
 }
+
+struct User: Decodable {
+    
+    let login: String
+    let avatar_url: String
+    let type: String
+}
+
+//struct UserSectionModel {
+//    var items: [Item]
+//}
+//
+//extension UserSectionModel {
+//
+//    typealias Item = User
+//
+//    init(original: UserSectionModel, items: [Item]) {
+//        self = original
+//        self.items = items
+//    }
+//}

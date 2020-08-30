@@ -10,39 +10,51 @@ import UIKit
 
 class DetailTableViewController: UITableViewController {
     
-    var currentUser: UserInfo!
+    var currentUserName: String!
+    var currentUser: [UserInfo] = []
     private var repos: [Repo] = []
     private var selectedIndex = IndexPath()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NetworkManager.fetchUserReposData { result in
-
+        NetworkManager.fetchUserDetail(for: currentUserName) { result in
+            
+            switch result {
+            case .success(let user):
+                self.currentUser.append(user)
+                self.tableView.reloadData()
+            case.failure(let error):
+                print(error)
+            }
+        }
+        
+        NetworkManager.fetchUserRepoDetail(for: currentUserName) { result in
             switch result {
             case .success(let repos):
                 for repo in repos {
                     self.repos.append(repo)
                 }
                 self.tableView.reloadData()
-            case .failure(let error):
+            case.failure(let error):
                 print(error)
             }
         }
+
     }
 
     // MARK: - Table view data source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return repos.count + 1
+        return repos.count + currentUser.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DetailCell", for: indexPath) as! DetailTableViewCell
         
-        let user = currentUser!
+            let user = currentUser.first!
         cell.configure(with: user)
 
         return cell

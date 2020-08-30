@@ -14,7 +14,7 @@ class SearchTableViewCell: UITableViewCell {
     @IBOutlet var userName: UILabel!
     @IBOutlet var userType: UILabel!
     
-    func configure(with user: UserInfo) {
+    func configure(with user: User) {
         userName.text = user.login
         userType.text = user.type
         imageUser.fetchImage(with: user.avatar_url)
