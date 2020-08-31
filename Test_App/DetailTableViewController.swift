@@ -12,6 +12,7 @@ class DetailTableViewController: UITableViewController {
     
     var currentUserName: String!
     var currentUser: [UserInfo] = []
+    private var isTapped = false
     private var repos: [Repo] = []
     private var selectedIndex = IndexPath()
     
@@ -40,24 +41,24 @@ class DetailTableViewController: UITableViewController {
                 print(error)
             }
         }
-
+        
     }
-
+    
     // MARK: - Table view data source
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return repos.count + currentUser.count
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DetailCell", for: indexPath) as! DetailTableViewCell
-        
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DetailCell", for: indexPath) as! DetailTableViewCell
+            
             let user = currentUser.first!
-        cell.configure(with: user)
-
-        return cell
+            cell.configure(with: user)
+            
+            return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "RepoCell", for: indexPath) as! RepoTableViewCell
             
@@ -70,17 +71,18 @@ class DetailTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         selectedIndex = indexPath
+        isTapped.toggle()
         tableView.reloadRows(at: [indexPath], with: .automatic)
+        
     }
-
+    
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0 {
             return 150
-        } else if indexPath == selectedIndex {
-                return 150
+        } else if indexPath == selectedIndex, isTapped {
+            return 150
         } else {
             return 75
         }
     }
-
 }

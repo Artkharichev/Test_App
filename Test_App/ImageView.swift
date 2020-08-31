@@ -14,7 +14,6 @@ class ImageView: UIImageView {
         
         guard let imageURL = url.getURL() else { return }
         
-        // if image to cache - use cache
         if let cachedImage = getCachedImage(url: imageURL) {
             image = cachedImage
             return

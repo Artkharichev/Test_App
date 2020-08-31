@@ -15,32 +15,23 @@ class RepoTableViewCell: UITableViewCell {
     @IBOutlet var stars: UILabel!
     @IBOutlet var dateUpdate: UILabel!
     
-    @IBOutlet var showButton: UIButton!
-    @IBOutlet var hideButton: UIButton!
-    
-    
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        showButton.isHidden = false
-        hideButton.isHidden = true
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        showDetailInfo()
-    }
-    
     func configure(with repo: Repo) {
         repoName.text = repo.name ?? "No repos"
         language.text = repo.language ?? "No info"
-        dateUpdate.text = repo.updated_at ?? "No date"
-        stars.text = "\(repo.stargazers_count)"
+        dateUpdate.text = convertDate(from: repo.updated_at ?? "No date")
+        stars.text = "Stars: \(repo.stargazers_count)"
     }
     
-    func showDetailInfo() {
-        showButton.isHidden.toggle()
-        hideButton.isHidden.toggle()
+    func convertDate(from string: String) -> String {
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        
+        let dateFormatterPrint = DateFormatter()
+        dateFormatterPrint.dateFormat = "MMM dd,yyyy"
+        
+        guard let date: Date  = dateFormatterGet.date(from: string) else { return "No date"}
+
+        return dateFormatterPrint.string(from: date)
     }
 }
+
